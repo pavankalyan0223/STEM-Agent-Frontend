@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+html {
+  overflow-y: overlay; 
+}
+
+
+body {
+  overflow-y: hidden;
+}
+#root {
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  color: #fff;
+}
