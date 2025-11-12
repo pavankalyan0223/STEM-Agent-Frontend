@@ -41,133 +41,172 @@ export default function Sidebar({
 
 
   return (
-    <aside className="h-full w-full border-r border-gray-800 bg-black p-3 flex flex-col gap-3 overflow-hidden text-gray-200">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Sessions</h2>
+    <aside className="h-full w-full border-r border-gray-700 bg-gray-900/90 backdrop-blur-sm p-6 flex flex-col gap-4 overflow-hidden shadow-xl">
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Sessions</h2>
         <button
-          className="px-2 py-1 rounded-xl border border-gray-700 hover:bg-neutral-900"
+          className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-500 hover:to-purple-500 transition-all shadow-lg hover:shadow-xl font-medium"
           onClick={() => onNewSession(uuidv4())}
           title="New chat"
         >
-          + New
+          <span className="flex items-center gap-2">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            New
+          </span>
         </button>
       </div>
 
       {/* Session List */}
-      <div className="flex flex-col gap-1">
-        {sessions.map((s) => (
-          <div
-            key={s.id}
-            className={clsx(
-              "flex items-center justify-between px-3 py-2 rounded-xl border border-gray-700 hover:bg-neutral-900",
-              currentId === s.id && "border-blue-500 bg-neutral-900"
-            )}
-          >
-            <button
-              onClick={() => onSelect(s.id)}
-              className="flex-1 text-left overflow-hidden"
-              title="Open session"
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-sm">{s.mode === "math" ? "📐" : "⚛️"}</span>
-                <span className="font-medium truncate">{s.title || "Untitled"}</span>
-              </div>
-              <div className="text-xs text-gray-400 truncate">
-                {s.preview || "Start chatting…"}
-              </div>
-            </button>
-
-            {/* Delete Button */}
-            <button
-              onClick={() => onDeleteSession(s.id)}
-              className="ml-2 text-gray-500 hover:text-red-500 transition"
-              title="Delete session"
-            >
-              ✕
-            </button>
+      <div className="flex flex-col gap-2 flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
+        {sessions.length === 0 ? (
+          <div className="text-center py-8 text-gray-400">
+            <svg className="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            <p className="text-sm">No sessions yet</p>
           </div>
-        ))}
+        ) : (
+          sessions.map((s) => (
+            <div
+              key={s.id}
+              className={clsx(
+                "flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200",
+                currentId === s.id
+                  ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg transform scale-[1.02]"
+                  : "bg-gray-800 hover:bg-gray-700 text-gray-200 hover:shadow-md border border-gray-700"
+              )}
+            >
+              <button
+                onClick={() => onSelect(s.id)}
+                className="flex-1 text-left overflow-hidden"
+                title="Open session"
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-lg">{s.mode === "math" ? "📐" : "⚛️"}</span>
+                  <span className="font-semibold truncate text-sm">{s.title || "Untitled"}</span>
+                </div>
+                <div className={`text-xs truncate ${currentId === s.id ? 'text-white/80' : 'text-gray-400'}`}>
+                  {s.preview || "Start chatting…"}
+                </div>
+              </button>
+
+              {/* Delete Button */}
+              <button
+                onClick={() => onDeleteSession(s.id)}
+                className={`ml-2 p-1 rounded-lg transition-colors ${
+                  currentId === s.id
+                    ? "text-white/80 hover:bg-white/20 hover:text-white"
+                    : "text-gray-400 hover:text-red-400 hover:bg-red-900/20"
+                }`}
+                title="Delete session"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          ))
+        )}
       </div>
 
       {/* Mode Controls */}
-      <div className="mt-2 grid gap-2">
-        <label className="text-sm font-medium">Mode</label>
+      <div className="mt-2 space-y-3">
+        <label className="text-sm font-semibold text-gray-300">Mode</label>
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={() => setMode("math")}
             className={clsx(
-              "px-3 py-2 rounded-xl border border-gray-700 hover:bg-neutral-900",
-              mode === "math" && "border-blue-500 bg-neutral-900"
+              "px-3 py-2 rounded-xl border transition-all duration-200 font-medium text-sm",
+              mode === "math"
+                ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white border-blue-500 shadow-md"
+                : "bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700 hover:border-blue-500"
             )}
           >
-            📐 Math+General
+            📐 Math
           </button>
           <button
             onClick={() => setMode("physics")}
             className={clsx(
-              "px-3 py-2 rounded-xl border border-gray-700 hover:bg-neutral-900",
-              mode === "physics" && "border-purple-500 bg-neutral-900"
+              "px-3 py-2 rounded-xl border transition-all duration-200 font-medium text-sm",
+              mode === "physics"
+                ? "bg-gradient-to-r from-purple-600 to-purple-700 text-white border-purple-500 shadow-md"
+                : "bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700 hover:border-purple-500"
             )}
           >
-            ⚛️ Physics+General
+            ⚛️ Physics
           </button>
         </div>
 
-        <label className="flex items-center gap-2 text-sm mt-2">
+        <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
           <input
             type="checkbox"
             checked={useRag}
             onChange={(e) => setUseRag(e.target.checked)}
+            className="w-4 h-4 text-blue-600 border-gray-600 rounded focus:ring-blue-500 bg-gray-800"
           />
-          Use textbook retrieval (RAG)
+          <span>Use textbook retrieval (RAG)</span>
         </label>
 
         <button
           onClick={onReindex}
-          className="mt-2 px-3 py-2 rounded-xl border border-gray-700 hover:bg-neutral-900"
+          className="w-full px-3 py-2 rounded-xl border border-gray-700 bg-gray-800 hover:bg-gray-700 text-gray-300 transition-all hover:shadow-md font-medium text-sm"
           title="Reindex PDFs"
         >
-          ♻️ Reindex PDFs
+          <span className="flex items-center justify-center gap-2">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Reindex PDFs
+          </span>
         </button>
 
-
-{/* --- Upload PDFs --- */}
-      <div className="mt-4">
-        <h3 className="text-sm font-semibold mb-2">Knowledge Base</h3>
-        <button
-          onClick={() => fileInputRef.current.click()}
-          className="w-full px-3 py-2 rounded-xl border border-gray-700 hover:bg-neutral-900 disabled:opacity-50"
-          disabled={uploading}
-        >
-          📤 Upload PDFs
-        </button>
-        <input
-          type="file"
-          accept=".pdf"
-          multiple
-          ref={fileInputRef}
-          onChange={handleUpload}
-          className="hidden"
-        />
-        {uploading ? (
-          <p className="text-xs text-gray-400 mt-1 animate-pulse">
-            {uploadMsg}
-          </p>
-        ) : uploadMsg ? (
-          <p className="text-xs text-gray-400 mt-1">{uploadMsg}</p>
-        ) : null}
-      </div>
+        {/* --- Upload PDFs --- */}
+        <div className="mt-4">
+          <h3 className="text-sm font-semibold mb-2 text-gray-300">Knowledge Base</h3>
+          <button
+            onClick={() => fileInputRef.current.click()}
+            className="w-full px-3 py-2 rounded-xl border border-gray-700 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 transition-all hover:shadow-md font-medium text-sm text-gray-300"
+            disabled={uploading}
+          >
+            <span className="flex items-center justify-center gap-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+              Upload PDFs
+            </span>
+          </button>
+          <input
+            type="file"
+            accept=".pdf"
+            multiple
+            ref={fileInputRef}
+            onChange={handleUpload}
+            className="hidden"
+          />
+          {uploading ? (
+            <p className="text-xs text-blue-400 mt-2 flex items-center gap-2">
+              <svg className="animate-spin h-3 w-3" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              {uploadMsg}
+            </p>
+          ) : uploadMsg ? (
+            <p className={`text-xs mt-2 ${uploadMsg.includes("failed") ? "text-red-400" : "text-green-400"}`}>{uploadMsg}</p>
+          ) : null}
+        </div>
 
         <Link
-        to="/summaries"
-        className="mt-3 px-3 py-2 rounded-xl border border-gray-700 text-center hover:bg-neutral-900"
+          to="/summaries"
+          className="mt-3 px-3 py-2 rounded-xl border border-gray-700 text-center bg-gray-800 hover:bg-gray-700 transition-all hover:shadow-md font-medium text-sm text-gray-300 flex items-center justify-center gap-2"
         >
-        🧾 Summarized Content
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          Summarized Content
         </Link>
-      </div>
-
-      <div className="mt-auto text-[11px] text-gray-500">
-        20% / 80% layout • Dark mode
       </div>
     </aside>
   );
