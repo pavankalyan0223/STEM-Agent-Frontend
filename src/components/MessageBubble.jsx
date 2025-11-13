@@ -19,10 +19,10 @@ export default function MessageBubble({ role, content, mode }) {
 
       <div
         className={[
-          "max-w-[72ch] px-5 py-4 rounded-2xl shadow-lg break-words transition-all",
+          "max-w-[75ch] px-5 py-4 rounded-2xl shadow-xl break-words transition-all backdrop-blur-sm",
           isUser
-            ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-br-sm"
-            : "bg-gray-800 border border-gray-700 text-gray-100 rounded-bl-sm",
+            ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-br-sm hover:shadow-2xl"
+            : "bg-gray-800/90 border border-gray-700/50 text-gray-100 rounded-bl-sm hover:shadow-2xl",
         ].join(" ")}
       >
         <div className={`prose prose-sm max-w-none ${isUser ? 'prose-invert' : 'prose-invert'}`}>
