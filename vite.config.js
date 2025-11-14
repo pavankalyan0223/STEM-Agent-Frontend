@@ -6,4 +6,13 @@ export default defineConfig({
   plugins: [react(),
     tailwindcss()
   ],
+  optimizeDeps: {
+    include: ['vis-network'],
+    force: true
+  },
+  server: {
+    fs: {
+      strict: false
+    }
+  }
 })

@@ -55,3 +55,22 @@ export async function uploadPdfs(files) {
   });
   return data;
 }
+
+export async function fetchResearchPapers({ query, maxResults = 20, category = null }) {
+  const { data } = await axios.post(`${API_BASE}/research`, {
+    query,
+    max_results: maxResults,
+    category,
+  });
+  return data;
+}
+
+export async function buildResearchGraph() {
+  const { data } = await axios.post(`${API_BASE}/research-graph/build`);
+  return data;
+}
+
+export async function fetchResearchGraph() {
+  const { data } = await axios.get(`${API_BASE}/research-graph`);
+  return data;
+}

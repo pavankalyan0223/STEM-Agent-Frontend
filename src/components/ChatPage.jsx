@@ -235,7 +235,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="h-screen w-full overflow-hidden grid grid-cols-[22%_78%] bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
+    <div className="h-screen w-full overflow-hidden grid grid-cols-[22%_78%] bg-black">
       {/* LEFT: Sidebar */}
       <Sidebar
         sessions={sessions}
@@ -257,7 +257,7 @@ export default function ChatPage() {
           mode={mode}
           isLoading={isLoading}
         />
-        <div className="flex-shrink-0 p-5 border-t border-gray-700/50 bg-gradient-to-t from-gray-900/95 via-gray-900/90 to-transparent backdrop-blur-md">
+        <div className="flex-shrink-0 p-6 border-t border-gray-700 bg-black backdrop-blur-md">
           <div className="max-w-4xl mx-auto">
             <ChatInput onSend={sendMessage} disabled={isLoading} />
           </div>
