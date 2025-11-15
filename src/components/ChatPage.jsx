@@ -21,8 +21,8 @@ function filterSystemMessages(messages) {
       const content = msg.content.toLowerCase().trim();
       const systemPromptPatterns = [
         "you are a friendly",
-        "you are a math tutor",
-        "you are a physics tutor",
+        "you are a math expert",
+        "you are a physics expert",
         "keep answers accurate",
         "conversational when appropriate",
         "highly knowledgeable",
@@ -132,7 +132,7 @@ export default function ChatPage() {
     setCurrentMessages([
       {
         role: "assistant",
-        content: "Hi! I’m your tutor. Ask me problems or just chat.",
+        content: "Hi! I'm your expert. Ask me problems or just chat.",
       },
     ]);
   };
@@ -164,7 +164,7 @@ export default function ChatPage() {
 
     setIsLoading(true);
     try {
-      const { tutor_reply } = await askBackend({
+      const { expert_reply } = await askBackend({
         mode: mode,
         question: originalUserText,
         session_id: currentId,
@@ -221,7 +221,7 @@ export default function ChatPage() {
         setCurrentMessages(processedMessages);
       } catch (reloadError) {
         // If reload fails, just add the assistant message
-        const newAssistantMsg = { role: "assistant", content: tutor_reply };
+        const newAssistantMsg = { role: "assistant", content: expert_reply };
         setCurrentMessages((msgs) => [...msgs, newAssistantMsg]);
       }
     } catch (e) {
@@ -235,7 +235,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="h-screen w-full overflow-hidden grid grid-cols-[22%_78%] bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
+    <div className="h-screen w-full overflow-hidden grid grid-cols-[22%_78%] bg-black">
       {/* LEFT: Sidebar */}
       <Sidebar
         sessions={sessions}
@@ -257,7 +257,7 @@ export default function ChatPage() {
           mode={mode}
           isLoading={isLoading}
         />
-        <div className="flex-shrink-0 p-5 border-t border-gray-700/50 bg-gradient-to-t from-gray-900/95 via-gray-900/90 to-transparent backdrop-blur-md">
+        <div className="flex-shrink-0 p-6 border-t border-gray-700 bg-black backdrop-blur-md">
           <div className="max-w-4xl mx-auto">
             <ChatInput onSend={sendMessage} disabled={isLoading} />
           </div>

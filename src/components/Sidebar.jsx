@@ -41,18 +41,19 @@ export default function Sidebar({
 
 
   return (
-    <aside className="h-full w-full border-r border-gray-700/50 bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800 backdrop-blur-sm p-5 flex flex-col gap-5 overflow-hidden shadow-2xl">
-      <div className="flex items-center justify-between mb-1">
+    <aside className="h-full w-full border-r border-gray-700/50 bg-black backdrop-blur-sm p-6 flex flex-col gap-6 overflow-hidden shadow-2xl">
+      <div className="flex items-center justify-between mb-2 animate-slide-up">
         <div>
-          <h2 className="text-xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Chat Sessions</h2>
-          <p className="text-xs text-gray-500 mt-0.5">Your conversations</p>
+          <h2 className="text-xl font-bold text-white tracking-tight">Chat Sessions</h2>
+          <p className="text-xs text-gray-500 mt-1">Your conversations</p>
         </div>
         <button
-          className="px-3 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-500 hover:to-purple-500 transition-all shadow-md hover:shadow-lg hover:scale-105 font-medium text-sm"
+          className="px-4 py-2.5 rounded-xl bg-white text-black hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 font-medium text-sm relative overflow-hidden group"
           onClick={() => onNewSession(uuidv4())}
           title="New chat"
         >
-          <span className="flex items-center gap-1.5">
+          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
+          <span className="relative flex items-center gap-1.5">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
@@ -75,11 +76,12 @@ export default function Sidebar({
             <div
               key={s.id}
               className={clsx(
-                "flex items-center justify-between px-3 py-2.5 rounded-lg transition-all duration-200 group",
+                "flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 group cursor-pointer animate-slide-up",
                 currentId === s.id
-                  ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg transform scale-[1.01]"
-                  : "bg-gray-800/50 hover:bg-gray-700/70 text-gray-200 hover:shadow-md border border-gray-700/50 hover:border-gray-600"
+                  ? "bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.2)] transform scale-[1.02] border-2 border-white"
+                  : "bg-gray-900 hover:bg-gray-800 text-white hover:shadow-lg border border-gray-700 hover:border-gray-600 hover:scale-[1.01]"
               )}
+              style={{ animationDelay: `${sessions.indexOf(s) * 0.05}s` }}
             >
               <button
                 onClick={() => onSelect(s.id)}
@@ -90,7 +92,7 @@ export default function Sidebar({
                   <span className="text-lg">{s.mode === "math" ? "📐" : "⚛️"}</span>
                   <span className="font-semibold truncate text-sm">{s.title || "Untitled"}</span>
                 </div>
-                <div className={`text-xs truncate ${currentId === s.id ? 'text-white/80' : 'text-gray-400'}`}>
+                <div className={`text-xs truncate ${currentId === s.id ? 'text-black/70' : 'text-gray-400'}`}>
                   {s.preview || "Start chatting…"}
                 </div>
               </button>
@@ -100,8 +102,8 @@ export default function Sidebar({
                 onClick={() => onDeleteSession(s.id)}
                 className={`ml-2 p-1 rounded-lg transition-colors ${
                   currentId === s.id
-                    ? "text-white/80 hover:bg-white/20 hover:text-white"
-                    : "text-gray-400 hover:text-red-400 hover:bg-red-900/20"
+                    ? "text-black/70 hover:bg-black/20 hover:text-black"
+                    : "text-gray-400 hover:text-white hover:bg-gray-800"
                 }`}
                 title="Delete session"
               >
@@ -117,29 +119,47 @@ export default function Sidebar({
       {/* Mode Controls */}
       <div className="mt-auto space-y-3 pt-4 border-t border-gray-700/50">
         <div>
-          <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 block">Subject Mode</label>
-          <div className="grid grid-cols-2 gap-2">
+          <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 block">Subject Mode</label>
+          <div className="flex gap-4 justify-center items-center">
           <button
             onClick={() => setMode("math")}
             className={clsx(
-              "px-3 py-2 rounded-xl border transition-all duration-200 font-medium text-sm",
+              "relative w-18 h-18 rounded-full border-2 transition-all duration-500 ease-out font-medium text-sm flex flex-col items-center justify-center group overflow-hidden",
               mode === "math"
-                ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white border-blue-500 shadow-md"
-                : "bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700 hover:border-blue-500"
+                ? "bg-white text-black border-white shadow-[0_0_30px_rgba(255,255,255,0.3)] scale-105"
+                : "bg-black border-gray-600 text-white hover:bg-gray-900 hover:border-gray-500 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:scale-110 active:scale-95"
             )}
+            style={{ transition: "all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)", width: "4.5rem", height: "4.5rem" }}
           >
-            📐 Math
+            <div className={clsx(
+              "absolute inset-0 rounded-full opacity-0 transition-opacity duration-500",
+              mode === "math" ? "bg-gradient-to-br from-white/20 to-transparent opacity-100" : "group-hover:bg-gradient-to-br group-hover:from-white/10 group-hover:to-transparent group-hover:opacity-100"
+            )}></div>
+            <span className={clsx(
+              "text-2xl mb-0.5 relative z-10 transition-transform duration-300",
+              mode === "math" ? "animate-float" : "group-hover:scale-110"
+            )}>📐</span>
+            <span className="relative z-10 text-xs font-semibold tracking-wide">Math</span>
           </button>
           <button
             onClick={() => setMode("physics")}
             className={clsx(
-              "px-3 py-2 rounded-xl border transition-all duration-200 font-medium text-sm",
+              "relative w-18 h-18 rounded-full border-2 transition-all duration-500 ease-out font-medium text-sm flex flex-col items-center justify-center group overflow-hidden",
               mode === "physics"
-                ? "bg-gradient-to-r from-purple-600 to-purple-700 text-white border-purple-500 shadow-md"
-                : "bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700 hover:border-purple-500"
+                ? "bg-white text-black border-white shadow-[0_0_30px_rgba(255,255,255,0.3)] scale-105"
+                : "bg-black border-gray-600 text-white hover:bg-gray-900 hover:border-gray-500 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:scale-110 active:scale-95"
             )}
+            style={{ transition: "all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)", width: "4.5rem", height: "4.5rem" }}
           >
-            ⚛️ Physics
+            <div className={clsx(
+              "absolute inset-0 rounded-full opacity-0 transition-opacity duration-500",
+              mode === "physics" ? "bg-gradient-to-br from-white/20 to-transparent opacity-100" : "group-hover:bg-gradient-to-br group-hover:from-white/10 group-hover:to-transparent group-hover:opacity-100"
+            )}></div>
+            <span className={clsx(
+              "text-2xl mb-0.5 relative z-10 transition-transform duration-300",
+              mode === "physics" ? "animate-float" : "group-hover:scale-110"
+            )}>⚛️</span>
+            <span className="relative z-10 text-xs font-semibold tracking-wide">Physics</span>
           </button>
         </div>
         </div>
@@ -150,14 +170,14 @@ export default function Sidebar({
               type="checkbox"
               checked={useRag}
               onChange={(e) => setUseRag(e.target.checked)}
-              className="w-4 h-4 text-blue-600 border-gray-600 rounded focus:ring-blue-500 bg-gray-800"
+              className="w-4 h-4 text-white border-gray-600 rounded focus:ring-white bg-black"
             />
             <span>Use textbook retrieval (RAG)</span>
           </label>
 
           <button
             onClick={onReindex}
-            className="w-full px-3 py-2 rounded-lg border border-gray-700/50 bg-gray-800/50 hover:bg-gray-700/70 text-gray-300 transition-all hover:shadow-md hover:border-gray-600 font-medium text-sm"
+            className="w-full px-3 py-2 rounded-lg border border-gray-700 bg-black hover:bg-gray-900 text-white transition-all hover:shadow-md hover:border-gray-600 font-medium text-sm"
             title="Reindex PDFs"
           >
             <span className="flex items-center justify-center gap-2">
@@ -193,7 +213,7 @@ export default function Sidebar({
             className="hidden"
           />
           {uploading ? (
-            <p className="text-xs text-blue-400 mt-2 flex items-center gap-2">
+            <p className="text-xs text-white mt-2 flex items-center gap-2">
               <svg className="animate-spin h-3 w-3" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -201,18 +221,38 @@ export default function Sidebar({
               {uploadMsg}
             </p>
           ) : uploadMsg ? (
-            <p className={`text-xs mt-2 ${uploadMsg.includes("failed") ? "text-red-400" : "text-green-400"}`}>{uploadMsg}</p>
+            <p className={`text-xs mt-2 ${uploadMsg.includes("failed") ? "text-gray-400" : "text-white"}`}>{uploadMsg}</p>
           ) : null}
         </div>
 
         <Link
           to="/summaries"
-          className="px-3 py-2 rounded-lg border border-gray-700/50 text-center bg-gray-800/50 hover:bg-gray-700/70 transition-all hover:shadow-md hover:border-gray-600 font-medium text-sm text-gray-300 flex items-center justify-center gap-2"
+          className="px-3 py-2 rounded-lg border border-gray-700 text-center bg-black hover:bg-gray-900 transition-all hover:shadow-md hover:border-gray-600 font-medium text-sm text-white flex items-center justify-center gap-2"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
           Summarized Content
+        </Link>
+
+        <Link
+          to="/research"
+          className="px-3 py-2 rounded-lg border border-gray-700 text-center bg-black hover:bg-gray-900 transition-all hover:shadow-md hover:border-gray-600 font-medium text-sm text-white flex items-center justify-center gap-2"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+          Research Papers
+        </Link>
+
+        <Link
+          to="/research-graph"
+          className="px-3 py-2 rounded-lg border border-gray-700 text-center bg-black hover:bg-gray-900 transition-all hover:shadow-md hover:border-gray-600 font-medium text-sm text-white flex items-center justify-center gap-2"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+          </svg>
+          Research Graph
         </Link>
       </div>
     </aside>

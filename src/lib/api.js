@@ -55,3 +55,45 @@ export async function uploadPdfs(files) {
   });
   return data;
 }
+
+export async function fetchResearchPapers({ query, maxResults = 20, category = null }) {
+  const { data } = await axios.post(`${API_BASE}/research`, {
+    query,
+    max_results: maxResults,
+    category,
+  });
+  return data;
+}
+
+export async function listPdfs() {
+  const { data } = await axios.get(`${API_BASE}/research-graph/pdfs`);
+  return data;
+}
+
+export async function buildResearchGraph(pdfFiles = null) {
+  const { data } = await axios.post(`${API_BASE}/research-graph/build`, pdfFiles ? { pdf_files: pdfFiles } : {});
+  return data;
+}
+
+export async function fetchResearchGraph(graphFilename = null) {
+  const url = graphFilename 
+    ? `${API_BASE}/research-graph?graph_filename=${encodeURIComponent(graphFilename)}`
+    : `${API_BASE}/research-graph`;
+  const { data } = await axios.get(url);
+  return data;
+}
+
+export async function listGraphs() {
+  const { data } = await axios.get(`${API_BASE}/research-graph/list`);
+  return data;
+}
+
+export async function deleteGraph(graphFilename) {
+  const { data } = await axios.delete(`${API_BASE}/research-graph/${encodeURIComponent(graphFilename)}`);
+  return data;
+}
+
+export async function getPdfText(filename) {
+  const { data } = await axios.get(`${API_BASE}/research-graph/pdf-text/${encodeURIComponent(filename)}`);
+  return data;
+}
