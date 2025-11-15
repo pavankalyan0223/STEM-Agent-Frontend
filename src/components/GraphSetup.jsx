@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { listPdfs, buildResearchGraph, listGraphs, uploadPdfs, fetchResearchGraph } from "../lib/api.js";
+import { listPdfs, buildResearchGraph, listGraphs, uploadPdfs, fetchResearchGraph, deleteGraph } from "../lib/api.js";
 
 // Dynamic import for vis-network to avoid Vite optimization issues
 let Network = null;
@@ -55,9 +55,10 @@ export default function GraphSetup({ onGraphReady, onGraphSelect }) {
       
       // Always set the first graph as preview (will be used in background)
       if (graphsList.length > 0) {
-        setSelectedGraphPreview(graphsList[0]);
-        // Load the graph data for preview
-        loadPreviewGraph();
+        const firstGraph = graphsList[0];
+        setSelectedGraphPreview(firstGraph);
+        // Load the graph data for preview using filename
+        loadPreviewGraph(firstGraph.filename);
       } else {
         setSelectedGraphPreview(null);
         setPreviewGraphData(null);
@@ -67,9 +68,9 @@ export default function GraphSetup({ onGraphReady, onGraphSelect }) {
     }
   };
 
-  const loadPreviewGraph = async () => {
+  const loadPreviewGraph = async (graphFilename = null) => {
     try {
-      const graphData = await fetchResearchGraph();
+      const graphData = await fetchResearchGraph(graphFilename);
       if (!graphData.error && graphData.nodes && graphData.nodes.length > 0) {
         setPreviewGraphData(graphData);
       }
@@ -144,7 +145,7 @@ export default function GraphSetup({ onGraphReady, onGraphSelect }) {
   const handleLoadGraph = async (graph) => {
     setLoading(true);
     try {
-      const graphData = await fetchResearchGraph();
+      const graphData = await fetchResearchGraph(graph.filename);
       if (graphData.error) {
         alert(`Error loading graph: ${graphData.error}`);
       } else {
@@ -155,6 +156,32 @@ export default function GraphSetup({ onGraphReady, onGraphSelect }) {
       alert("Failed to load graph. Please try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteGraph = async (graph, e) => {
+    e.stopPropagation(); // Prevent triggering the graph selection
+    
+    if (!confirm(`Are you sure you want to delete "${graph.name}"?`)) {
+      return;
+    }
+
+    try {
+      const result = await deleteGraph(graph.filename);
+      if (result.error) {
+        alert(`Error deleting graph: ${result.error}`);
+      } else {
+        // Reload graphs list
+        await loadGraphs();
+        // If deleted graph was selected, clear selection
+        if (selectedGraphPreview?.filename === graph.filename) {
+          setSelectedGraphPreview(null);
+          setPreviewGraphData(null);
+        }
+      }
+    } catch (error) {
+      console.error("Error deleting graph:", error);
+      alert("Failed to delete graph. Please try again.");
     }
   };
 
@@ -427,14 +454,26 @@ export default function GraphSetup({ onGraphReady, onGraphSelect }) {
                   {graphs.map((graph) => (
                     <div
                       key={graph.filename}
-                      onClick={() => setSelectedGraphPreview(graph)}
-                      className={`p-3 bg-black border rounded-lg cursor-pointer transition-all ${
+                      onClick={() => {
+                        setSelectedGraphPreview(graph);
+                        loadPreviewGraph(graph.filename);
+                      }}
+                      className={`p-3 bg-black border rounded-lg cursor-pointer transition-all relative group ${
                         selectedGraphPreview?.filename === graph.filename
                           ? "border-white bg-gray-900"
                           : "border-white hover:border-gray-400"
                       }`}
                     >
-                      <h3 className="text-sm font-semibold text-white mb-1">{graph.name}</h3>
+                      <button
+                        onClick={(e) => handleDeleteGraph(graph, e)}
+                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 bg-red-600 hover:bg-red-700 rounded text-white text-xs"
+                        title="Delete graph"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                      <h3 className="text-sm font-semibold text-white mb-1 pr-6">{graph.name}</h3>
                       <div className="flex gap-2 text-xs text-white">
                         <span>📄 {graph.papers_count}</span>
                         <span>🔖 {graph.topics_count}</span>

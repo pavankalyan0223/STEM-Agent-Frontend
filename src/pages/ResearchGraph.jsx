@@ -25,7 +25,7 @@ export default function ResearchGraph() {
   const [building, setBuilding] = useState(false);
   const [graphData, setGraphData] = useState(null);
   const [selectedNode, setSelectedNode] = useState(null);
-  const [filterType, setFilterType] = useState("all"); // "all", "papers", "topics"
+  const [filterType, setFilterType] = useState("all"); // "all", "papers", "topics", "linked_topics", "difference"
   const [showSetup, setShowSetup] = useState(true);
   const graphRef = useRef(null);
   const networkRef = useRef(null);
@@ -94,6 +94,63 @@ export default function ResearchGraph() {
         filteredNodes = graphData.nodes.filter(n => n.type === "paper");
       } else if (filterType === "topics") {
         filteredNodes = graphData.nodes.filter(n => n.type === "topic");
+      } else if (filterType === "linked_topics") {
+        // Show only topics that are linked to other nodes (topics)
+        // Find all topics that have edges connecting them to other topics
+        const linkedTopicIds = new Set();
+        
+        graphData.edges.forEach(edge => {
+          if (edge.type === "similar_topic") {
+            // This edge connects two topics
+            linkedTopicIds.add(edge.source);
+            linkedTopicIds.add(edge.target);
+          }
+        });
+        
+        // Filter to show only topics that are linked to other topics
+        filteredNodes = graphData.nodes.filter(n => {
+          if (n.type === "topic") {
+            return linkedTopicIds.has(n.id);
+          }
+          // Don't show papers or other node types
+          return false;
+        });
+      } else if (filterType === "difference") {
+        // Show only topics that are linked to other topics from DIFFERENT papers
+        // Find topics connected to topics from different papers
+        const differentPaperTopicIds = new Set();
+        
+        graphData.edges.forEach(edge => {
+          if (edge.type === "similar_topic") {
+            // This edge connects two topics
+            const sourceTopic = graphData.nodes.find(n => n.id === edge.source);
+            const targetTopic = graphData.nodes.find(n => n.id === edge.target);
+            
+            if (sourceTopic && targetTopic && sourceTopic.type === "topic" && targetTopic.type === "topic") {
+              // Get papers for each topic
+              const sourcePapers = new Set(sourceTopic.papers || []);
+              const targetPapers = new Set(targetTopic.papers || []);
+              
+              // Check if topics are from different papers (no overlap)
+              const hasOverlap = [...sourcePapers].some(paperId => targetPapers.has(paperId));
+              
+              // Only include if topics are from different papers
+              if (!hasOverlap) {
+                differentPaperTopicIds.add(edge.source);
+                differentPaperTopicIds.add(edge.target);
+              }
+            }
+          }
+        });
+        
+        // Filter to show only topics that are linked to topics from different papers
+        filteredNodes = graphData.nodes.filter(n => {
+          if (n.type === "topic") {
+            return differentPaperTopicIds.has(n.id);
+          }
+          // Don't show papers or other node types
+          return false;
+        });
       }
 
       // Filter edges to only include edges between visible nodes
@@ -419,6 +476,8 @@ export default function ResearchGraph() {
             <option value="all" style={{ backgroundColor: "#111827", color: "#ffffff" }}>All Nodes</option>
             <option value="papers" style={{ backgroundColor: "#111827", color: "#ffffff" }}>Papers Only</option>
             <option value="topics" style={{ backgroundColor: "#111827", color: "#ffffff" }}>Topics Only</option>
+            <option value="linked_topics" style={{ backgroundColor: "#111827", color: "#ffffff" }}>Linked Topics</option>
+            <option value="difference" style={{ backgroundColor: "#111827", color: "#ffffff" }}>Difference</option>
           </select>
           <button
             onClick={handleBuildGraph}

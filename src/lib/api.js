@@ -75,13 +75,21 @@ export async function buildResearchGraph(pdfFiles = null) {
   return data;
 }
 
-export async function fetchResearchGraph() {
-  const { data } = await axios.get(`${API_BASE}/research-graph`);
+export async function fetchResearchGraph(graphFilename = null) {
+  const url = graphFilename 
+    ? `${API_BASE}/research-graph?graph_filename=${encodeURIComponent(graphFilename)}`
+    : `${API_BASE}/research-graph`;
+  const { data } = await axios.get(url);
   return data;
 }
 
 export async function listGraphs() {
   const { data } = await axios.get(`${API_BASE}/research-graph/list`);
+  return data;
+}
+
+export async function deleteGraph(graphFilename) {
+  const { data } = await axios.delete(`${API_BASE}/research-graph/${encodeURIComponent(graphFilename)}`);
   return data;
 }
 
