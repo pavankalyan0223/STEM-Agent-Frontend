@@ -21,8 +21,8 @@ function filterSystemMessages(messages) {
       const content = msg.content.toLowerCase().trim();
       const systemPromptPatterns = [
         "you are a friendly",
-        "you are a math tutor",
-        "you are a physics tutor",
+        "you are a math expert",
+        "you are a physics expert",
         "keep answers accurate",
         "conversational when appropriate",
         "highly knowledgeable",
@@ -132,7 +132,7 @@ export default function ChatPage() {
     setCurrentMessages([
       {
         role: "assistant",
-        content: "Hi! I’m your tutor. Ask me problems or just chat.",
+        content: "Hi! I'm your expert. Ask me problems or just chat.",
       },
     ]);
   };
@@ -164,7 +164,7 @@ export default function ChatPage() {
 
     setIsLoading(true);
     try {
-      const { tutor_reply } = await askBackend({
+      const { expert_reply } = await askBackend({
         mode: mode,
         question: originalUserText,
         session_id: currentId,
@@ -221,7 +221,7 @@ export default function ChatPage() {
         setCurrentMessages(processedMessages);
       } catch (reloadError) {
         // If reload fails, just add the assistant message
-        const newAssistantMsg = { role: "assistant", content: tutor_reply };
+        const newAssistantMsg = { role: "assistant", content: expert_reply };
         setCurrentMessages((msgs) => [...msgs, newAssistantMsg]);
       }
     } catch (e) {

@@ -65,12 +65,27 @@ export async function fetchResearchPapers({ query, maxResults = 20, category = n
   return data;
 }
 
-export async function buildResearchGraph() {
-  const { data } = await axios.post(`${API_BASE}/research-graph/build`);
+export async function listPdfs() {
+  const { data } = await axios.get(`${API_BASE}/research-graph/pdfs`);
+  return data;
+}
+
+export async function buildResearchGraph(pdfFiles = null) {
+  const { data } = await axios.post(`${API_BASE}/research-graph/build`, pdfFiles ? { pdf_files: pdfFiles } : {});
   return data;
 }
 
 export async function fetchResearchGraph() {
   const { data } = await axios.get(`${API_BASE}/research-graph`);
+  return data;
+}
+
+export async function listGraphs() {
+  const { data } = await axios.get(`${API_BASE}/research-graph/list`);
+  return data;
+}
+
+export async function getPdfText(filename) {
+  const { data } = await axios.get(`${API_BASE}/research-graph/pdf-text/${encodeURIComponent(filename)}`);
   return data;
 }

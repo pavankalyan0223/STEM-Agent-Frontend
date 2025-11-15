@@ -7,7 +7,7 @@ export default defineConfig({
     tailwindcss()
   ],
   optimizeDeps: {
-    include: ['vis-network'],
+    include: ['vis-network', 'pdfjs-dist'],
     force: true
   },
   server: {

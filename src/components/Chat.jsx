@@ -32,7 +32,7 @@ export default function Chat({ messages, mode, isLoading }) {
                 </div>
               </div>
               <h3 className="text-3xl font-bold text-white mb-3 tracking-tight">
-                Welcome to your {mode === "math" ? "Math" : "Physics"} Tutor
+                Welcome to your {mode === "math" ? "Math" : "Physics"} Expert
               </h3>
               <p className="text-gray-400 text-lg mb-2 max-w-md">Ask questions, solve problems, or explore concepts</p>
               <p className="text-gray-500 text-sm">Powered by AI with local documents & web search</p>

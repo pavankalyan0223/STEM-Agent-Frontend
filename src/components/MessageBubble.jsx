@@ -10,7 +10,7 @@ export default function MessageBubble({ role, content, mode }) {
       {!isUser && (
         <div
           className="mt-1 size-12 rounded-full grid place-items-center shadow-lg shrink-0 bg-white hover:scale-110 transition-transform duration-300"
-          title={mode === "math" ? "Math tutor" : "Physics tutor"}
+          title={mode === "math" ? "Math expert" : "Physics expert"}
         >
           <span className="text-xl">{mode === "math" ? "📐" : "⚛️"}</span>
         </div>
