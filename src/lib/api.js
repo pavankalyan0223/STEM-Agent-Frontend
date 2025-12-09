@@ -11,6 +11,63 @@ export async function askBackend({ mode, question, session_id, use_rag }) {
   return data;
 }
 
+export async function askBackendStream({ mode, question, session_id, use_rag, onChunk, onComplete, onError }) {
+  try {
+    const response = await fetch(`${API_BASE}/ask/stream`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        mode,
+        question,
+        session_id,
+        use_rag,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() || ""; // Keep incomplete line in buffer
+
+      for (const line of lines) {
+        if (line.startsWith("data: ")) {
+          try {
+            const data = JSON.parse(line.slice(6));
+            if (data.error) {
+              onError?.(new Error(data.content));
+              return;
+            }
+            if (data.done) {
+              onComplete?.();
+              return;
+            }
+            if (data.content) {
+              onChunk?.(data.content);
+            }
+          } catch (e) {
+            console.error("Error parsing SSE data:", e);
+          }
+        }
+      }
+    }
+  } catch (error) {
+    onError?.(error);
+  }
+}
+
 export async function fetchSessions() {
   const { data } = await axios.get(`${API_BASE}/sessions`);
   return data.sessions;

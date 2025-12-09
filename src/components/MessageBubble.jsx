@@ -30,10 +30,27 @@ export default function MessageBubble({ role, content, mode }) {
           rehypePlugins={[rehypeKatex]}
           components={{
             code(props) {
-              const { children, className } = props;
+              const { children, className, inline } = props;
+              // Inline code (inline is true or no className)
+              if (inline || !className) {
+                return (
+                  <code className={`px-1.5 py-0.5 rounded ${isUser ? 'bg-gray-200 text-black' : 'bg-gray-800 text-white'}`}>
+                    {children}
+                  </code>
+                );
+              }
+              // Code block - return code element (will be wrapped in pre by ReactMarkdown)
               return (
-                  <pre className={`overflow-auto rounded-lg p-3 ${isUser ? 'bg-gray-200 text-black' : 'bg-black text-white'} ${className || ""}`}>
-                  <code>{children}</code>
+                <code className={className}>
+                  {children}
+                </code>
+              );
+            },
+            pre(props) {
+              const { children } = props;
+              return (
+                <pre className={`overflow-auto rounded-lg p-3 my-2 ${isUser ? 'bg-gray-200 text-black' : 'bg-black text-white'}`}>
+                  {children}
                 </pre>
               );
             },
