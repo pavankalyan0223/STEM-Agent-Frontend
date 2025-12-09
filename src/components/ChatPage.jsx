@@ -4,6 +4,7 @@ import Chat from "./Chat.jsx";
 import ChatInput from "./ChatInput.jsx";
 import {
   askBackend,
+  askBackendStream,
   fetchSessions,
   fetchSessionMessages,
   deleteSession,
@@ -162,75 +163,106 @@ export default function ChatPage() {
     const newUserMsg = { role: "user", content: originalUserText };
     setCurrentMessages((msgs) => [...msgs, newUserMsg]);
 
+    // Create a placeholder assistant message for streaming
+    const assistantMessageId = Date.now();
+    const newAssistantMsg = { 
+      role: "assistant", 
+      content: "",
+      id: assistantMessageId 
+    };
+    setCurrentMessages((msgs) => [...msgs, newAssistantMsg]);
+
     setIsLoading(true);
+    
+    let fullResponse = "";
+    
     try {
-      const { expert_reply } = await askBackend({
+      await askBackendStream({
         mode: mode,
         question: originalUserText,
         session_id: currentId,
         use_rag: useRag,
-      });
-
-      // Reload messages from backend to ensure we have the correct state
-      // This ensures we get the actual messages stored by the backend
-      try {
-        const msgs = await fetchSessionMessages(currentId);
-        const filteredMessages = filterSystemMessages(msgs);
-        
-        // Process messages to use original user inputs
-        const processedMessages = filteredMessages.map((msg, index) => {
-          if (msg.role === "user") {
-            // Try to find the most recent user message that matches
-            // If backend paraphrased, we'll use the original we sent
-            const recentUserMessages = filteredMessages
-              .slice(0, index + 1)
-              .filter(m => m.role === "user")
-              .reverse();
+        onChunk: (chunk) => {
+          // Append chunk to full response
+          fullResponse += chunk;
+          
+          // Update the assistant message with accumulated content
+          setCurrentMessages((msgs) => {
+            return msgs.map((msg) => {
+              if (msg.id === assistantMessageId) {
+                return { ...msg, content: fullResponse };
+              }
+              return msg;
+            });
+          });
+        },
+        onComplete: async () => {
+          setIsLoading(false);
+          
+          // Reload messages from backend to ensure we have the correct state
+          try {
+            const msgs = await fetchSessionMessages(currentId);
+            const filteredMessages = filterSystemMessages(msgs);
             
-            // Use the original text we sent if this looks like it might be paraphrased
-            // For now, we'll trust the backend, but store a mapping
-            return msg;
+            // Process messages to use original user inputs
+            const processedMessages = filteredMessages.map((msg, index) => {
+              if (msg.role === "user") {
+                return msg;
+              }
+              return msg;
+            });
+            
+            // Store mapping of backend user messages to original inputs
+            const userMessages = processedMessages.filter(m => m.role === "user");
+            if (userMessages.length > 0) {
+              const lastUserMsg = userMessages[userMessages.length - 1];
+              const originalInputs = getOriginalInputs();
+              
+              // Store mapping: backend content -> original content
+              if (lastUserMsg.content !== originalUserText) {
+                originalInputs.set(lastUserMsg.content, originalUserText);
+                saveOriginalInputs(originalInputs);
+              }
+              
+              // Replace the last user message with original if different
+              if (lastUserMsg.content !== originalUserText) {
+                const lastIndex = processedMessages.findIndex(m => 
+                  m.role === "user" && m.content === lastUserMsg.content
+                );
+                if (lastIndex !== -1) {
+                  processedMessages[lastIndex] = { ...lastUserMsg, content: originalUserText };
+                }
+              }
+            }
+            
+            setCurrentMessages(processedMessages);
+          } catch (reloadError) {
+            console.error("Failed to reload messages:", reloadError);
+            // Keep the streamed message if reload fails
+          }
+        },
+        onError: (error) => {
+          setIsLoading(false);
+          setCurrentMessages((msgs) => {
+            return msgs.map((msg) => {
+              if (msg.id === assistantMessageId) {
+                return { ...msg, content: `⚠️ ${error.message}` };
+              }
+              return msg;
+            });
+          });
+        },
+      });
+    } catch (e) {
+      setIsLoading(false);
+      setCurrentMessages((msgs) => {
+        return msgs.map((msg) => {
+          if (msg.id === assistantMessageId) {
+            return { ...msg, content: `⚠️ ${e.message}` };
           }
           return msg;
         });
-        
-        // Store mapping of backend user messages to original inputs
-        // This helps us preserve original text on refresh
-        const userMessages = processedMessages.filter(m => m.role === "user");
-        if (userMessages.length > 0) {
-          const lastUserMsg = userMessages[userMessages.length - 1];
-          const originalInputs = getOriginalInputs();
-          
-          // Store mapping: backend content -> original content
-          if (lastUserMsg.content !== originalUserText) {
-            originalInputs.set(lastUserMsg.content, originalUserText);
-            saveOriginalInputs(originalInputs);
-          }
-          
-          // Replace the last user message with original if different
-          if (lastUserMsg.content !== originalUserText) {
-            const lastIndex = processedMessages.findIndex(m => 
-              m.role === "user" && m.content === lastUserMsg.content
-            );
-            if (lastIndex !== -1) {
-              processedMessages[lastIndex] = { ...lastUserMsg, content: originalUserText };
-            }
-          }
-        }
-        
-        setCurrentMessages(processedMessages);
-      } catch (reloadError) {
-        // If reload fails, just add the assistant message
-        const newAssistantMsg = { role: "assistant", content: expert_reply };
-        setCurrentMessages((msgs) => [...msgs, newAssistantMsg]);
-      }
-    } catch (e) {
-      setCurrentMessages((msgs) => [
-        ...msgs,
-        { role: "assistant", content: `⚠️ ${e.message}` },
-      ]);
-    } finally {
-      setIsLoading(false);
+      });
     }
   }
 
